@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Streaming</title>
+    <link href="https://vjs.zencdn.net/8.9.0/video-js.min.css" rel="stylesheet" />
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #0e0e0e;
+            color: white;
+        }
+
+        header {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            background: #181818;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+        }
+
+        .title {
+            font-size: 22px;
+            font-weight: bold;
+        }
+
+        .container {
+            display: flex;
+            padding: 20px;
+            gap: 20px;
+        }
+
+        .video-container {
+            flex: 2;
+            max-width: 720px;
+        }
+
+        .chat-container {
+            flex: 1;
+            background: #1e1e1e;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            max-height: 500px;
+            position: relative;
+            padding-bottom: 60px;
+            overflow-y: hidden;
+        }
+
+        #chat-messages {
+            overflow-y: scroll;
+            max-height: 420px;
+            display: flex;
+            flex-direction: column-reverse;
+        }
+
+        .chat-message {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .chat-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+
+        .chat-text {
+            background: #2a2a2a;
+            padding: 8px 12px;
+            border-radius: 10px;
+            max-width: 75%;
+        }
+
+        .chat-input-container {
+            display: flex;
+            gap: 10px;
+            width: 100%;
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            padding-top: 10px;
+            background-color: #1e1e1e;
+            z-index: 2;
+        }
+
+        .chat-input {
+            width: calc(100% - 100px);
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            background: #2a2a2a;
+            color: white;
+            font-size: 14px;
+        }
+
+        .send-btn {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 14px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .send-btn:hover {
+            background-color: #0056b3;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1 class="title">HafidLive</h1>
+    </header>
+
+    <div class="container">
+        <div class="video-container">
+            <video id="m3u8-player" class="video-js vjs-default-skin vjs-big-play-centered" controls preload="auto">
+                <source src="http://your-streaming-url.com/live/stream.m3u8" type="application/x-mpegURL">
+            </video>
+        </div>
+
+        <div class="chat-container">
+            <h2>Live Chat</h2>
+            <div id="chat-messages"></div>
+            <div class="chat-input-container">
+                <input type="text" id="chat-input" placeholder="Ketik pesan..." class="chat-input">
+                <button id="send-btn" class="send-btn">Kirim</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://vjs.zencdn.net/8.9.0/video.min.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var player = videojs('m3u8-player', {
+                liveui: true,
+                fluid: true,
+                autoplay: false,
+                playbackRates: [0.5, 1, 1.5, 2]
+            });
+
+            player.on('ready', function () {
+                console.log('Player siap!');
+            });
+
+            player.on('error', function () {
+                console.error('Kesalahan memuat video.');
+            });
+
+            const chatMessages = document.getElementById('chat-messages');
+            const chatInput = document.getElementById('chat-input');
+
+            const users = [
+                { name: "Ari", avatar: "https://i.pravatar.cc/40?img=1" },
+                { name: "Budi", avatar: "https://i.pravatar.cc/40?img=2" },
+                { name: "Citra", avatar: "https://i.pravatar.cc/40?img=3" },
+                { name: "Dewi", avatar: "https://i.pravatar.cc/40?img=4" },
+                { name: "Eka", avatar: "https://i.pravatar.cc/40?img=5" },
+                { name: "Fajar", avatar: "https://i.pravatar.cc/40?img=6" },
+                { name: "Gita", avatar: "https://i.pravatar.cc/40?img=7" }
+            ];
+
+            const messages = [
+                "Halo semua!",
+                "Streamingnya lancar!",
+                "Mantap videonya",
+                "Ada yang nonton dari Bandung?",
+                "Sinyalnya jernih!",
+                "Ada jadwal siaran ulang ga?",
+                "Wow keren banget!"
+            ];
+
+            function addChatMessage(user, text) {
+                const messageDiv = document.createElement('div');
+                messageDiv.classList.add('chat-message');
+                messageDiv.innerHTML = `
+                    <img src="${user.avatar}" class="chat-avatar">
+                    <div>
+                        <strong>${user.name}</strong>
+                        <div class="chat-text">${text}</div>
+                    </div>
+                `;
+                chatMessages.appendChild(messageDiv);
+
+                // Geser otomatis ke atas
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+
+            function sendRandomChat() {
+                const randomUser = users[Math.floor(Math.random() * users.length)];
+                const randomMessage = messages[Math.floor(Math.random() * messages.length)];
+                addChatMessage(randomUser, randomMessage);
+            }
+
+            setInterval(sendRandomChat, 5000);
+
+            document.getElementById("send-btn").addEventListener("click", function () {
+                if (chatInput.value.trim() !== "") {
+                    addChatMessage({ name: "Kamu", avatar: "https://i.pravatar.cc/40?img=8" }, chatInput.value);
+                    chatInput.value = "";
+                }
+            });
+
+            chatInput.addEventListener("keypress", function (event) {
+                if (event.key === "Enter" && chatInput.value.trim() !== "") {
+                    addChatMessage({ name: "Kamu", avatar: "https://i.pravatar.cc/40?img=8" }, chatInput.value);
+                    chatInput.value = "";
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>
+
+
+
+
+
